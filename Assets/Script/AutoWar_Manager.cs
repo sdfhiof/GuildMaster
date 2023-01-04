@@ -72,7 +72,7 @@ public class AutoWar_Manager : MonoBehaviour
         for(var i = 0; i < tList.Count; i++)
         {            
             float tDis = ((Vector2)tList[i].transform.localPosition - (Vector2)unit.transform.localPosition).sqrMagnitude;
-            if(tDis <= unit._unitAR * unit._unitAR)
+            if(tDis <= unit._unitFR * unit._unitFR)
             {
                 if(tList[i]._unitState != WarUnit.UnitState.death)
                 {
