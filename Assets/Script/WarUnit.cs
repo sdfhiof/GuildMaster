@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WarUnit : MonoBehaviour
 {
-    public SPUM_Prefabs _spumPref;    
+    public SPUM_Prefabs _spumPref;
 
     AutoWar_Manager AM;
 
@@ -23,7 +23,7 @@ public class WarUnit : MonoBehaviour
         stun,
 
         death
-    } 
+    }
 
     public UnitState _unitState = UnitState.idle;
 
@@ -49,7 +49,7 @@ public class WarUnit : MonoBehaviour
 
     void Start()
     {
-        AM = AutoWar_Manager.GetInstance();        
+        AM = AutoWar_Manager.GetInstance();
     }
 
     void Update()
@@ -64,40 +64,40 @@ public class WarUnit : MonoBehaviour
 
     void CheckState()
     {
-        switch(_unitState)
+        switch (_unitState)
         {
             case UnitState.idle:
-            FindTarget();
-            break;
+                FindTarget();
+                break;
 
             case UnitState.run:
-            FindTarget();
-            DoMove();
-            break;
+                FindTarget();
+                DoMove();
+                break;
 
             case UnitState.attack:
-            CheckAttack();
-            break;
+                CheckAttack();
+                break;
 
             case UnitState.skill:
-            break;
+                break;
 
             case UnitState.stun:
-            break;
+                break;
 
             case UnitState.death:
-            break;
+                break;
         }
     }
 
     void SetState(UnitState state)
     {
         _unitState = state;
-        switch(_unitState)
+        switch (_unitState)
         {
             case UnitState.idle:
                 _spumPref.PlayAnimation("idle");
-            break;
+                break;
 
             case UnitState.run:
                 _spumPref.PlayAnimation("run");
@@ -130,7 +130,7 @@ public class WarUnit : MonoBehaviour
             if (_target != null) SetState(UnitState.run);
             else SetState(UnitState.idle);
             _findTimer = 0f;
-        }        
+        }
     }
 
     void DoMove()
@@ -169,7 +169,7 @@ public class WarUnit : MonoBehaviour
 
         _attackTimer += Time.deltaTime;
 
-        if(_attackTimer > _unitAS)
+        if (_attackTimer > _unitAS)
         {
             DoAttack();
             _attackTimer = 0;
@@ -183,7 +183,7 @@ public class WarUnit : MonoBehaviour
 
     void SetDirection()
     {
-        if(_dirVec.x >= 0)
+        if (_dirVec.x >= 0)
         {
             _spumPref._anim.transform.localScale = new Vector3(-1, 1, 1);
         }
