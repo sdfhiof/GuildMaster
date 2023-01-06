@@ -382,6 +382,8 @@
 "Assets/Script/UnitController.cs"
 "Assets/Script/UnitZPos.cs"
 "Assets/Script/WarUnit.cs"
+"Assets/Script/WarUnitEditor.cs"
+"Assets/Script/WarUnitSet.cs"
 "Assets/SPUM/Sample/Script/PlayerManager.cs"
 "Assets/SPUM/Sample/Script/PlayerObj.cs"
 "Assets/SPUM/SoonsoonData/SoonsoonData.cs"
