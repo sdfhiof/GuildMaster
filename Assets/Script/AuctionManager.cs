@@ -81,7 +81,7 @@ public class AuctionManager : MonoBehaviour
     public void AuctionFailed(ref Queue<GameObject> queue)
     {
 
-        _auctionFailedQueue.Enqueue(queue.)
+       // _auctionFailedQueue.Enqueue(queue.);
 
 
        queue.Dequeue();
