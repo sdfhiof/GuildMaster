@@ -72,6 +72,7 @@
     <Compile Include="Assets\Script\SPUM_SpriteList.cs" />
     <Compile Include="Assets\Script\SPUM_PackageButton.cs" />
     <Compile Include="Assets\SPUM\Sample\Script\PlayerObj.cs" />
+    <Compile Include="Assets\Script\AuctionStart.cs" />
     <Compile Include="Assets\Script\Plugin\Moments Recorder\Scripts\ReflectionUtils.cs" />
     <Compile Include="Assets\SPUM\Sprite_Editor(Beta)\Script\SpriteEyeSync.cs" />
     <Compile Include="Assets\Script\SPUM_SpriteButtonST.cs" />
@@ -91,7 +92,6 @@
     <Compile Include="Assets\Script\Plugin\Moments Recorder\Scripts\Gif\LzwEncoder.cs" />
     <Compile Include="Assets\Script\WarUnit.cs" />
     <Compile Include="Assets\Script\UnitController.cs" />
-    <Compile Include="Assets\Script\AuctionStart.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\2D_Background_SunshineForest\2D_Horizontal_battle_Enviroment_05\Get full backgrounds pack.txt" />

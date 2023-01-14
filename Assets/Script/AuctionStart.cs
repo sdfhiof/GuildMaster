@@ -11,13 +11,19 @@ public class AuctionStart : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        AM.Time = 15f;
         
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+       
+        AM.NowBetGoldAmount += 15; // 중간 지점 업데이트에 있는게 아니면 텍스트같은 애들은 실시간 변수 변화가 적용이 안됨
+        AM.MyBetGoldAmount += 10;  // 그래서 한 경매가 끝나고 호출되는 bettingreset도 적용이 안됨
+        AM.NowBetGold.text = AM.NowBetGoldAmount.ToString();
+        AM.MyBetGold.text = AM.MyBetGoldAmount.ToString();
+        AuctionTimer();
     }
 
     #region 경매 기능
@@ -28,10 +34,15 @@ public class AuctionStart : MonoBehaviour
             Destroy(AM.NowAuctionUnit);
         }
         AM.NowAuctionUnit = RemoteActionUnitList();
+
+        if (AM.NowAuctionUnit == null)
+        {
+            return;
+        }
         AM.NowAuctionUnitPos.transform.localScale = new Vector3(5f, 5f, 1f);
         AM.NowAuctionUnit = Instantiate(AM.NowAuctionUnit, AM.NowAuctionUnitPos.transform);
         AM.NowAuctionUnit.transform.localPosition = Vector3.zero;
-
+        BettingReset();
     }
 
     //AuctionUnit.transform.GetChild(ActOrListPnt-1).gameObject;
@@ -41,42 +52,74 @@ public class AuctionStart : MonoBehaviour
     public void AuctionFailed()
     {
         GameObject FailedUnit = RemoteActionUnitList();
+
+        if(FailedUnit == null)
+        {
+            return;
+        }
         AM._FailedPos[AM.FailedCount].transform.localScale += new Vector3(2f, 2f, 1f);
         AM._failedUnitsList[AM.FailedCount] = Instantiate(FailedUnit, AM._FailedPos[AM.FailedCount].transform);
         FailedUnit.transform.localPosition = Vector3.zero;
 
         AM.FailedCount++;
+        BettingReset();
     }
 
 
     public GameObject RemoteActionUnitList()
     {
-        GameObject ZeroListIndex = AM._instanceUnitsList[0];// 중단점 반환을 복사의복사를 해대서 ㅈ됨
-        int InstUnCnt = AM._instanceUnitsList.Count;
-        AM.ActOrListPnt++;
-        if (AM._instanceUnitsList == null)
+        if (AM._instanceUnitsList.Count != 0)
         {
-            return null; // 경매 리스트에 아무도 없으면 경매를 종료해야함
+            GameObject ZeroListIndex = AM._instanceUnitsList[0];// 아직 못고침 반환을 복사의복사를 해대서 ㅈ됨
+            int InstUnCnt = AM._instanceUnitsList.Count;
+            AM.ActOrListPnt++;
+
+
+            --InstUnCnt;
+            for (int i = 0; i < InstUnCnt; i++)
+            {
+
+                GameObject FirstPos = GameObject.Find($"AuctionPos{i}");
+                GameObject FirePosChild = FirstPos.transform.GetChild(0).gameObject;
+                Destroy(FirePosChild);
+
+                AM._instanceUnitsList[i] = Instantiate(AM._auctionOrderList[AM.ActOrListPnt + i], AM._auctionPos[i].transform);
+                AM._instanceUnitsList[i].transform.localPosition = Vector3.zero;
+            }
+            Destroy(AM._instanceUnitsList[InstUnCnt]);
+            AM._instanceUnitsList.RemoveAt(InstUnCnt);
+            AM.RemoteAtCount++;
+            return ZeroListIndex;
+
         }
-
-        --InstUnCnt;
-        for (int i = 0; i < InstUnCnt; i++)
-        {
-
-            GameObject FirstPos = GameObject.Find($"AuctionPos{i}");
-            GameObject FirePosChild = FirstPos.transform.GetChild(0).gameObject;
-            Destroy(FirePosChild);
-
-            AM._instanceUnitsList[i] = Instantiate(AM._auctionOrderList[AM.ActOrListPnt + i], AM._auctionPos[i].transform);
-            AM._instanceUnitsList[i].transform.localPosition = Vector3.zero;
-        }
-        Destroy(AM._instanceUnitsList[InstUnCnt]);
-        AM._instanceUnitsList.RemoveAt(InstUnCnt);
-        AM.RemoteAtCount++;
-        return ZeroListIndex;
-
+        return null;
     }
 
+    void AuctionTimer()
+    {
+        
+        AM.TimeText.text = Mathf.Ceil(AM.Time).ToString();
+        if (AM.Time > 0)
+        {
+            AM.Time -= Time.deltaTime;
+        }
+        else if (AM.NowBetGoldAmount == 0)
+        {
+            AuctionFailed();
+        }
+        else
+        {
+            Auction();
+        }
+        
+    }
+
+    void BettingReset()
+    {
+        AM.Time = 15f;
+        AM.NowBetGoldAmount = 0;
+        AM.MyBetGoldAmount = 0;
+    }
 
     void Betting(int MyBetGold)
     {
@@ -90,5 +133,12 @@ public class AuctionStart : MonoBehaviour
         return int.Parse(BetGold);
 
     }
+
+    public void BettingButton()
+    {
+        AM.Time = 10f;
+       
+    }
+
     #endregion
 }

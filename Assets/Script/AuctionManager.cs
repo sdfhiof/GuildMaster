@@ -16,13 +16,22 @@ public class AuctionManager : MonoBehaviour
     public List<GameObject> _auctionPos = new List<GameObject>();
     public List<GameObject> _FailedPos = new List<GameObject>();
 
+    public string Player1;
+    public string Player2;
+    public string Player3;
+    public string Player4;
+
 
     public GameObject AuctionUnit;
     public GameObject NowAuctionUnit;
     public GameObject NowAuctionUnitPos;
 
     public Text NowBetGold;
+    public int NowBetGoldAmount;
+
     public Text MyBetGold;
+    public int MyBetGoldAmount;
+
     public Button Bet100;
     public Button Bet10;
     public Button Bet5;
@@ -32,7 +41,8 @@ public class AuctionManager : MonoBehaviour
     public int RemoteAtCount = 0;
     public int ActOrListPnt = 0;
 
-
+    public Text TimeText;
+    public float Time;
 
     
     // Start is called before the first frame update
@@ -50,7 +60,8 @@ public class AuctionManager : MonoBehaviour
    
     void Update()
     {
-
+        NowBetGoldAmount = 0;
+        MyBetGoldAmount = 0;
     }
 
     #region 경매 시스템 초기 생성
