@@ -53,6 +53,7 @@ public class AuctionManager : MonoBehaviour
 
         auctionStart.Auction();
 
+        
         //Betting();
 
     }
@@ -121,6 +122,8 @@ public class AuctionManager : MonoBehaviour
 
     #endregion
 
+    
+
     #region 경매 기능
     //public void Auction()
     //{ 
@@ -132,7 +135,7 @@ public class AuctionManager : MonoBehaviour
     //    NowAuctionUnitPos.transform.localScale = new Vector3(5f, 5f, 1f);
     //    NowAuctionUnit = Instantiate(NowAuctionUnit, NowAuctionUnitPos.transform);  
     //    NowAuctionUnit.transform.localPosition = Vector3.zero;
-        
+
     //}
 
     ////AuctionUnit.transform.GetChild(ActOrListPnt-1).gameObject;
@@ -163,11 +166,11 @@ public class AuctionManager : MonoBehaviour
     //    --InstUnCnt;
     //    for (int i = 0; i < InstUnCnt; i++)
     //     {
-            
+
     //        GameObject FirstPos = GameObject.Find($"AuctionPos{i}");
     //        GameObject FirePosChild = FirstPos.transform.GetChild(0).gameObject;
     //        Destroy(FirePosChild);
-            
+
     //        _instanceUnitsList[i] = Instantiate(_auctionOrderList[ActOrListPnt + i], _auctionPos[i].transform);
     //        _instanceUnitsList[i].transform.localPosition = Vector3.zero;
     //    }
@@ -181,7 +184,7 @@ public class AuctionManager : MonoBehaviour
 
     //void Betting(int MyBetGold)
     //{
-        
+
     //}
 
     //int AddBettingMoney(Button button)
@@ -189,7 +192,7 @@ public class AuctionManager : MonoBehaviour
     //   string BetGold = button.transform.GetChild(0).ToString();
     //    Debug.Log(BetGold);
     //    return int.Parse(BetGold);
-        
+
     //}
     #endregion
 }

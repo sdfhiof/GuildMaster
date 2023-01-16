@@ -8,21 +8,22 @@ public class AuctionStart : MonoBehaviour
 {
     public AuctionManager AM;
 
+
     // Start is called before the first frame update
     void Start()
     {
         AM.Time = 15f;
-        
+        AM.NowBetGold.text = "0";
+        AM.MyBetGold.text = "0";
     }
 
     // Update is called once per frame
     void Update()
     {
-       
-        AM.NowBetGoldAmount += 15; // 중간 지점 업데이트에 있는게 아니면 텍스트같은 애들은 실시간 변수 변화가 적용이 안됨
-        AM.MyBetGoldAmount += 10;  // 그래서 한 경매가 끝나고 호출되는 bettingreset도 적용이 안됨
-        AM.NowBetGold.text = AM.NowBetGoldAmount.ToString();
-        AM.MyBetGold.text = AM.MyBetGoldAmount.ToString();
+        
+       // AM.NowBetGoldAmount += 15; // 중간 지점 업데이트에 있는게 아니면 텍스트같은 애들은 실시간 변수 변화가 적용이 안됨
+       // AM.MyBetGoldAmount += 10;  // 그래서 한 경매가 끝나고 호출되는 bettingreset도 적용이 안됨
+
         AuctionTimer();
     }
 
@@ -42,7 +43,7 @@ public class AuctionStart : MonoBehaviour
         AM.NowAuctionUnitPos.transform.localScale = new Vector3(5f, 5f, 1f);
         AM.NowAuctionUnit = Instantiate(AM.NowAuctionUnit, AM.NowAuctionUnitPos.transform);
         AM.NowAuctionUnit.transform.localPosition = Vector3.zero;
-        BettingReset();
+        
     }
 
     //AuctionUnit.transform.GetChild(ActOrListPnt-1).gameObject;
@@ -62,7 +63,7 @@ public class AuctionStart : MonoBehaviour
         FailedUnit.transform.localPosition = Vector3.zero;
 
         AM.FailedCount++;
-        BettingReset();
+        
     }
 
 
@@ -106,38 +107,53 @@ public class AuctionStart : MonoBehaviour
         else if (AM.NowBetGoldAmount == 0)
         {
             AuctionFailed();
+            BettingReset();
         }
-        else
+        else if(AM.NowBetGoldAmount > 0)
         {
             Auction();
+            BettingReset();
         }
         
     }
 
     void BettingReset()
     {
+        Debug.Log("asdasd");
         AM.Time = 15f;
         AM.NowBetGoldAmount = 0;
         AM.MyBetGoldAmount = 0;
+        AM.NowBetGold.text = AM.NowBetGoldAmount.ToString();
+        AM.MyBetGold.text = AM.MyBetGoldAmount.ToString();
     }
 
-    void Betting(int MyBetGold)
+    public void Betting(int MyBetGold)
     {
 
     }
 
-    int AddBettingMoney(Button button)
+    public void AddBettingMoney(Button button)
     {
-        string BetGold = button.transform.GetChild(0).ToString();
-        Debug.Log(BetGold);
-        return int.Parse(BetGold);
+        
+        string BetGold = button.transform.GetChild(0).name;
+        int Gold = int.Parse(BetGold);
+        Debug.Log(Gold);
+        AM.MyBetGoldAmount += Gold;
+        Debug.Log(AM.MyBetGoldAmount);
+        AM.MyBetGold.text = AM.MyBetGoldAmount.ToString();
+    }
 
+    public void AddMyBetMoney(int BetMoney)
+    {
+        
+        
+        Debug.Log("wwee");
     }
 
     public void BettingButton()
     {
         AM.Time = 10f;
-       
+        
     }
 
     #endregion
