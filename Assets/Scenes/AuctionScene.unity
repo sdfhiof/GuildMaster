@@ -2206,7 +2206,7 @@ MonoBehaviour:
   - {fileID: 600150407}
   - {fileID: 558634706}
   - {fileID: 1947282125}
-  _FailedPos:
+  _failedPos:
   - {fileID: 2137994922}
   - {fileID: 1164126894}
   - {fileID: 758219417}
@@ -2220,7 +2220,7 @@ MonoBehaviour:
   - {fileID: 690850443}
   - {fileID: 544508305}
   PlayerName: Player1
-  BidUnits: []
+  _bidUnits: []
   Gold: {fileID: 994990578}
   MyGold: 1000
   AuctionUnit: {fileID: 1228685836}
@@ -6520,7 +6520,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2137994923}
   m_Layer: 5
-  m_Name: FailedPos
+  m_Name: FailedPos0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

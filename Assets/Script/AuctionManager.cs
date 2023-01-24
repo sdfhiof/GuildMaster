@@ -12,7 +12,7 @@ public class AuctionManager : MonoBehaviour
     public List<GameObject> _instanceUnitsList = new List<GameObject>();        // 게임내 경매 리스트에 나타나는 인스턴스 프리팹들
     public List<GameObject> _failedUnitsList = new List<GameObject>();           // 유찰된 유닛 리스트
     public List<GameObject> _auctionPos = new List<GameObject>();               // 경매 리스트의 유닛들의 위치
-    public List<GameObject> _FailedPos = new List<GameObject>();                 // 유찰 리스트의 유닛들 위치
+    public List<GameObject> _failedPos = new List<GameObject>();                 // 유찰 리스트의 유닛들 위치
 
     public string PlayerName;                       // 플레이어 이름 차후 네트워크 연결시 서버에서 이름을 받아올 예정
     public List<GameObject> _bidUnits;           // 플레이어가 입찰 성공시 입찰한 유닛을 저장할 리스트
@@ -48,7 +48,7 @@ public class AuctionManager : MonoBehaviour
 
     void Start()
     {
-        Timer = 15f;                               // 초기 UI에 필요한  변수 초기화
+        Timer = 2f;                               // 초기 UI에 필요한  변수 초기화
         NowBetGold.text = "0";                 // 초기 UI에 필요한  변수 초기화
         MyBetGold.text = "0";                   // 초기 UI에 필요한  변수 초기화
         NowBidder = "현재 입찰자";           // 초기 UI에 필요한  변수 초기화
@@ -144,7 +144,13 @@ public class AuctionManager : MonoBehaviour
             Destroy(NowAuctionUnit);     // 현재 경매중인 유닛 삭제 (이전 경매가 끝났다는 의미)
             
         }
-        NowAuctionUnit = RemoteActionUnitList();  // 경매 유닛 설정 
+
+        if (_failedUnitsList.Count != 0 && _instanceUnitsList.Count == 0)
+        {
+            ReDefineList();
+        }
+
+        NowAuctionUnit = RemoveActionUnitList();  // 경매 유닛 설정 
 
         if (NowAuctionUnit == null)     // true일 경우 더 이상 가져올 경매 리스트가 없으므로 경매 종료
         {
@@ -155,6 +161,7 @@ public class AuctionManager : MonoBehaviour
         NowAuctionUnit = Instantiate(NowAuctionUnit, NowAuctionUnitPos.transform);            // NowAuctionUnit을 NowAuctionUnitPos의 자식으로 인스턴스화                                 
         NowAuctionUnit.transform.localPosition = Vector3.zero;                                           // NowAuctionUnit의 위치를 부모의 위치로 설정
 
+        
     }
 
     //AuctionUnit.transform.GetChild(ActOrListPnt-1).gameObject;
@@ -176,9 +183,9 @@ public class AuctionManager : MonoBehaviour
         {
             return;
         }
-        _FailedPos[FailedCount].transform.localScale += new Vector3(2f, 2f, 1f);                                    // 생성한 인스턴스 크기 조정을 위해
+        _failedPos[FailedCount].transform.localScale += new Vector3(2f, 2f, 1f);                                    // 생성한 인스턴스 크기 조정을 위해
                                                                                                                                         // NowAuctionUnitPos크기를 조정함
-        _failedUnitsList[FailedCount] = Instantiate(FailedUnit, _FailedPos[FailedCount].transform);              // FailedCount로 인스턴스화 된 오브젝트를
+        _failedUnitsList[FailedCount] = Instantiate(FailedUnit, _failedPos[FailedCount].transform);              // FailedCount로 인스턴스화 된 오브젝트를
                                                                                                                                         // 리스트와 _FailedPos의 위치를 결정
         FailedUnit.transform.localPosition = Vector3.zero;                                                                // FailedUnit의 위치를 부모의 위치로 설정
 
@@ -189,9 +196,9 @@ public class AuctionManager : MonoBehaviour
     }
 
 
-    public GameObject RemoteActionUnitList()  //경매 시작시 경매 위치로 올라가는 유닛 삭제 및 경매 리스트 정렬 함수
+    public GameObject RemoveActionUnitList()  //경매 시작시 경매 위치로 올라가는 유닛 삭제 및 경매 리스트 정렬 함수
     {
-        if (_instanceUnitsList.Count != 0)  // false일 경우 더 이상 가져올 경매 리스트가 없으므로 경매 종료
+        if (_instanceUnitsList.Count != 0 )  // false일 경우 더 이상 가져올 경매 리스트가 없으므로 경매 종료
         {
             GameObject ZeroListIndex = _instanceUnitsList[0];           // 현재 경매 유닛에 올라갈 0번째 리스트를 넣어준다
             int InstUnCnt = _instanceUnitsList.Count;                      // InstUnCnt을 리스트 수만큼 맞춰준다
@@ -205,8 +212,8 @@ public class AuctionManager : MonoBehaviour
             {
                 
                 GameObject FirstPos = GameObject.Find($"AuctionPos{i}");                                                       // i번쨰 AuctionPos를 가져온다
-                GameObject FirePosChild = FirstPos.transform.GetChild(0).gameObject;                                       // FirstPos의 자식에 접근한다
-                Destroy(FirePosChild);                                                                                                       // 자식 오브젝트를 삭제한다
+                GameObject FirstPosChild = FirstPos.transform.GetChild(0).gameObject;                                       // FirstPos의 자식에 접근한다
+                Destroy(FirstPosChild);                                                                                                       // 자식 오브젝트를 삭제한다
                                                                                                                                                    
                 _instanceUnitsList[i] = Instantiate(_auctionOrderList[ActOrListPnt + i], _auctionPos[i].transform);         // i번째의 경매리스트에 _auctionOrderList의 i+ActOrListPnt번쨰
                                                                                                                                                    // 리스트 값을 가져오고 i번쨰 _auctionPos의 자식으로 만들어준다
@@ -220,7 +227,33 @@ public class AuctionManager : MonoBehaviour
             return ZeroListIndex;                                                                                                            // 가장 첫번째에 있던 경매 유닛을 반환해주어 현재 경매 유닛으로 설정한다
 
         }
-        return null;  
+        else
+        {
+            return null;
+        }
+    }
+
+    public void ReDefineList()
+    {
+
+        for (int i = 0; i < _failedUnitsList.Count; i++)
+        {
+            _instanceUnitsList.Add(new GameObject());
+        }
+
+        _instanceUnitsList[0] = Instantiate(_failedUnitsList[0], _auctionPos[0].transform);
+        for (int k = 0; k < _failedUnitsList.Count; k++)
+        {
+            _instanceUnitsList[k] = Instantiate(_failedUnitsList[k], _auctionPos[k].transform);
+            GameObject FailedPos = GameObject.Find($"FailedPos{k}");
+            GameObject FirstPosChild = FailedPos.transform.GetChild(0).gameObject;
+            Destroy(FirstPosChild);
+            
+        }
+        _failedUnitsList.Clear();
+        BettingReset();
+
+
     }
 
     void AuctionTimer()  // 업데이트에서 상시로 실행되는 경매 시간 함수
@@ -242,12 +275,11 @@ public class AuctionManager : MonoBehaviour
             Auction();                                         // 경매 함수 실행
             BettingReset();                                   // 이후 입찰에 사용된 변수들 초기화
         }
-
     }
 
     void BettingReset() // 입찰이 끝나고 입찰에 사용된 변수들 초기화
     {
-        Timer = 15f;                                         // 경매시간을 다시 15초로 초기화
+        Timer = 2f;                                         // 경매시간을 다시 15초로 초기화
         NowBetGoldAmount = 0;                        // 현재경매 가격 초기화
         MyGold += MyBetGoldAmount;               // 만약 입찰이 끝날때 내 입찰을 눌러놓은 상태면 다시 내 골드에 더해준다
         MyBetGoldAmount = 0;                         //  그리고 내 입찰 가격 초기화
