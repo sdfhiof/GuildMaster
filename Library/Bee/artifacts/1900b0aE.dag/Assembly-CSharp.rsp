@@ -120,6 +120,7 @@
 -define:ENABLE_LEGACY_INPUT_MANAGER
 -define:CSHARP_7_OR_LATER
 -define:CSHARP_7_3_OR_NEWER
+-r:"Assets/Script/FreeNet/FreeNet.dll"
 -r:"C:/Program Files/Unity 2021.3.14f1/Editor/Data/Managed/UnityEngine/UnityEditor.CoreModule.dll"
 -r:"C:/Program Files/Unity 2021.3.14f1/Editor/Data/Managed/UnityEngine/UnityEditor.DeviceSimulatorModule.dll"
 -r:"C:/Program Files/Unity 2021.3.14f1/Editor/Data/Managed/UnityEngine/UnityEditor.DiagnosticsModule.dll"
@@ -358,6 +359,9 @@
 "Assets/Script/AuctionManager.cs"
 "Assets/Script/AutoWar_Manager.cs"
 "Assets/Script/Ect/SpritePos.cs"
+"Assets/Script/FreeNet/CFreeNetEventManager.cs"
+"Assets/Script/FreeNet/CFreeNetUnityService.cs"
+"Assets/Script/FreeNet/CRemoteServerPeer.cs"
 "Assets/Script/NewBehaviourScript.cs"
 "Assets/Script/Plugin/Moments Recorder/Scripts/Gif/GifEncoder.cs"
 "Assets/Script/Plugin/Moments Recorder/Scripts/Gif/GifFrame.cs"
