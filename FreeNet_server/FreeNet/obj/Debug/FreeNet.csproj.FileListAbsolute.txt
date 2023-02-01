@@ -1,0 +1,6 @@
+C:\Users\rgl\Downloads\source\소스코드\FreeNet_server_sourcecode\FreeNet\bin\Debug\FreeNet.dll
+C:\Users\rgl\Downloads\source\소스코드\FreeNet_server_sourcecode\FreeNet\bin\Debug\FreeNet.pdb
+C:\Users\rgl\Downloads\source\소스코드\FreeNet_server_sourcecode\FreeNet\obj\Debug\FreeNet.csproj.AssemblyReference.cache
+C:\Users\rgl\Downloads\source\소스코드\FreeNet_server_sourcecode\FreeNet\obj\Debug\FreeNet.csproj.CoreCompileInputs.cache
+C:\Users\rgl\Downloads\source\소스코드\FreeNet_server_sourcecode\FreeNet\obj\Debug\FreeNet.dll
+C:\Users\rgl\Downloads\source\소스코드\FreeNet_server_sourcecode\FreeNet\obj\Debug\FreeNet.pdb

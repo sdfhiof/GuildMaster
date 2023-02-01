@@ -157,8 +157,8 @@ public class AuctionManager : MonoBehaviour
         {
             return;
         }
-        NowAuctionUnitPos.transform.localScale = new Vector3(5f, 5f, 1f);                             /// 생성한 인스턴스 크기 조정을 위해
-                                                                                                                           /// NowAuctionUnitPos크기를 조정함
+        NowAuctionUnitPos.transform.localScale = new Vector3(5f, 5f, 1f);                             ///생성한 인스턴스 크기 조정을 위해
+                                                                                                                          /// NowAuctionUnitPos크기를 조정함
         NowAuctionUnit = Instantiate(NowAuctionUnit, NowAuctionUnitPos.transform);            /// NowAuctionUnit을 NowAuctionUnitPos의 자식으로 인스턴스화                                 
         NowAuctionUnit.transform.localPosition = Vector3.zero;                                           /// NowAuctionUnit의 위치를 부모의 위치로 설정
 
@@ -174,11 +174,6 @@ public class AuctionManager : MonoBehaviour
        
         GameObject FailedUnit = NowAuctionUnitPos.transform.GetChild(0).gameObject;         /// 현재 경매 중인 유닛을 오브젝트 변수에 넣음
         Destroy(NowAuctionUnit);                                                                                /// 현재 경매 중인 유닛 삭제
-
-        if (_instanceUnitsList.Count != 0)  // false일 경우 더 이상 가져올 경매 리스트가 없으므로 경매 종료 함수 실행
-        {
-
-        }
 
         if (FailedUnit == null)          // true일 경우 더 이상 가져올 경매 리스트가 없으므로 경매 종료
         {
