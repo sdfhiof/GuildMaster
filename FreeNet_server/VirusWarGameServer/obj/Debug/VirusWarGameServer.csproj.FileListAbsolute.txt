@@ -22,3 +22,7 @@ C:\Users\rgl\Desktop\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameSer
 C:\Users\rgl\Desktop\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameServer.csproj.CoreCompileInputs.cache
 C:\Users\rgl\Desktop\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameServer.exe
 C:\Users\rgl\Desktop\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameServer.pdb
+E:\GuildMaster\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameServer.csproj.AssemblyReference.cache
+E:\GuildMaster\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameServer.csproj.CoreCompileInputs.cache
+E:\GuildMaster\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameServer.exe
+E:\GuildMaster\FreeNet_server\VirusWarGameServer\obj\Debug\VirusWarGameServer.pdb

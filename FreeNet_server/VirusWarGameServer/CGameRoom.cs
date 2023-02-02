@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace VirusWarGameServer
 {
@@ -54,7 +55,7 @@ namespace VirusWarGameServer
 
 		int NowBetGoldAmount;
 
-		float Timer;
+		float time;
 
 		public CGameRoom()
 		{
@@ -162,8 +163,6 @@ namespace VirusWarGameServer
 		/// <summary>
 		/// 매칭이 성사된 플레이어들이 게임에 입장한다.
 		/// </summary>
-		/// <param name="player1"></param>
-		/// <param name="player2"></param>
 		public void enter_gameroom(CGameUser user1, CGameUser user2, CGameUser user3, CGameUser user4)
 		{
 			// 플레이어들을 생성하고 각각 0번, 1번, 2번, 3번 인덱스를 부여해 준다.
@@ -236,13 +235,19 @@ namespace VirusWarGameServer
                 msg.push(player.player_index);      // 누구인지 구분하기 위한 플레이어 인덱스.
 
                 
-                byte my_gold = (byte)player.myGold;
+                byte my_gold = (byte)player.myGold;  // 모든 플레이어에게 기본 경매금 설정
                 msg.push(my_gold);
                
             });
-            // 경매 시작을 알리는게 필요함
-            msg.push();
-            broadcast(msg);
+			broadcast(msg);
+
+			while (true)
+            {
+				AuctionTimer();
+
+			}
+            // 경매 시작을 알리는게 필요함 여기가 auctionTimer랑 비슷한 무언가가 필요함
+           
 		}
 
 		void Auction()   // 최조 경매 시작 그리고 매 경매가 끝날 때마다 실행  서버로 넘어갈듯
@@ -325,8 +330,6 @@ namespace VirusWarGameServer
 
 		}
 
-
-		/// 유닛 하나의 경매가 끝났을 떄 호출
 		public void ReDefineList()
 		{
 			_instanceUnitsIDList = _failedUnitsIDList.ToList();
@@ -388,13 +391,35 @@ namespace VirusWarGameServer
 		/// 여기가 경매 입찰등의 로직으로 채워질 것
 		public void auction_req(CPlayer sender)
 		{
-			
+			betting(sender);
 
 			// 최종 결과를 broadcast한다.
 			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
 			msg.push(sender.playerName);		                    // 누가
 			msg.push(NowBetGoldAmount);				        // 얼마에 입찰했는지
 			msg.push(sender.myGold);				                // 남은 돈은 얼마인지
+			broadcast(msg);                                           // 모두에게 전송
+		}
+
+		void betting(CPlayer sender)  // 입찰 시 실행되는 함수
+		{
+			if (sender.MyBetGoldAmount > NowBetGoldAmount)                 // 입찰 시 내 입찰 가격이 현재 경매가 보다 커야 실행된다
+			{
+				if (Bidder == sender.playerName)                                // 현재 입찰자가 자신이라면 입찰 비활성화한다
+				{
+					return;
+				}
+				NowBetGoldAmount = sender.MyBetGoldAmount;          // 현재 입찰가를 내 입찰가로 초기화한다
+				sender.MyBetGoldAmount = 0;                                   // 내 입찰가를 초기화한다
+				time = 10f;                                                           // 남은 경매 시간을 10초로 초기화한다
+				Bidder = sender.playerName;                                     // 현채 입찰자를 자신으로 초기화한다
+			}
+
+			// 최종 결과를 broadcast한다.
+			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
+			msg.push(sender.playerName);                       // 누가
+			msg.push(NowBetGoldAmount);                     // 얼마에 입찰했는지
+			msg.push(sender.myGold);                            // 남은 돈은 얼마인지
 			broadcast(msg);                                           // 모두에게 전송
 		}
 
@@ -413,8 +438,6 @@ namespace VirusWarGameServer
 				return;
 			}
 
-			// 만약 유찰된 유닛이 남았다면 실행
-			ReDefineList();
 		}
 
 

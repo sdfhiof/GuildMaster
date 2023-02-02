@@ -18,6 +18,8 @@ namespace VirusWarGameServer
 
 		public string playerName;
 
+		public int MyBetGoldAmount;
+
 		public CPlayer(CGameUser user, byte player_index)
 		{
 			this.owner = user;
