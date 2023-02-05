@@ -382,6 +382,7 @@
 "Assets/Script/SPUM_SpriteButtonST.cs"
 "Assets/Script/SPUM_SpriteList.cs"
 "Assets/Script/UnitController.cs"
+"Assets/Script/UnitPool.cs"
 "Assets/Script/UnitZPos.cs"
 "Assets/Script/WarUnit.cs"
 "Assets/Script/WarUnitSet.cs"

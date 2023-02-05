@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Pool;
 
 public class AuctionManager : MonoBehaviour
 {
@@ -54,6 +55,7 @@ public class AuctionManager : MonoBehaviour
         NowBidder = "현재 입찰자";           /// 초기 UI에 필요한  변수 초기화
 
 
+
         SetUnitList();                               
 
         Auction();
@@ -62,7 +64,7 @@ public class AuctionManager : MonoBehaviour
 
     }
 
-   
+
     void Update()
     {
         NowBetGold.text = NowBetGoldAmount.ToString();               ///  update에서 지속적으로 실행돼 실시간으로 갱신되는 UI들
