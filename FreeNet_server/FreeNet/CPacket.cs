@@ -157,5 +157,17 @@ namespace FreeNet
 			temp_buffer.CopyTo(this.buffer, this.position);
 			this.position += temp_buffer.Length;
 		}
+
+		// 문제 생길 확률 존내 높음
+		public void push(List<int> datalist)
+		{
+			for (int i = 0; i < datalist.Count; i++)
+			{
+				byte[] temp_buffer = BitConverter.GetBytes(datalist[i]);
+				temp_buffer.CopyTo(this.buffer, this.position);
+				this.position += temp_buffer.Length;
+			}
+
+		}
 	}
 }

@@ -55,7 +55,7 @@ namespace VirusWarGameServer
 
 		int NowBetGoldAmount;
 
-		float time;
+		int  AuctionTime;
 
 		public CGameRoom()
 		{
@@ -241,16 +241,18 @@ namespace VirusWarGameServer
             });
 			broadcast(msg);
 
-			while (true)
+			while (_instanceUnitsIDList.Count > 0 || _failedUnitsIDList.Count > 0)
             {
 				AuctionTimer();
 
 			}
-            // 경매 시작을 알리는게 필요함 여기가 auctionTimer랑 비슷한 무언가가 필요함
-           
+
+			game_over();
+
+
 		}
 
-		void Auction()   // 최조 경매 시작 그리고 매 경매가 끝날 때마다 실행  서버로 넘어갈듯
+		void Auction()   // 최조 경매 시작 그리고 매 경매가 끝날 때마다 실행 
 		{
 			if (0 <= NowAuctionUnitID && NowAuctionUnitID < 16)  // 현재 경매중인유닛이 있으면
 			{
@@ -313,7 +315,7 @@ namespace VirusWarGameServer
 			NowAuctionUnitID = 17;                     /// 현재 경매 중인 유닛 삭제
 
 
-			if (FailedUnit == 17)          // true일 경우 더 이상 가져올 경매 리스트가 없으므로 경매 종료
+			if (FailedUnit < 0 || 16 < FailedUnit )          // true일 경우 더 이상 가져올 경매 리스트가 없으므로 경매 종료
 			{
 				return;
 			}
@@ -348,19 +350,19 @@ namespace VirusWarGameServer
 		void AuctionTimer()  // 상시로 실행되는 경매 시간 함수
 		{
 
-			if (Timer > 0)                                        // 경매 시간이 0초가 아니면
+			if (AuctionTime > 0)                                        // 경매 시간이 0초가 아니면
 			{
-				Timer -= Time.deltaTime;                     // 1초씩 감소
+				AuctionTime -= Time.deltaTime;                     // 1초씩 감소
 			}
-			else if (NowBetGoldAmount == 0)             // 경매 시간이 다 됐는데 아무도 입찰하지 않았다면 실행
-			{
-				AuctionFailed();                                 // 유찰 함수 실행
-				bettingReset();                              // 이후 입찰에 사용된 변수들 초기화
-			}
-			else if (NowBetGoldAmount > 0)               // 경매 시간이 다 됐는데 누군가 입찰했다면
-			{
-				Auction();                                         // 경매 함수 실행
-				bettingReset();                               // 이후 입찰에 사용된 변수들 초기화
+			else if (NowBetGoldAmount == 0)                     // 경매 시간이 다 됐는데 아무도 입찰하지 않았다면 실행
+			{														        
+				AuctionFailed();                                          // 유찰 함수 실행
+				bettingReset();                                           // 이후 입찰에 사용된 변수들 초기화
+			}														        
+			else if (NowBetGoldAmount > 0)                       // 경매 시간이 다 됐는데 누군가 입찰했다면
+			{														        
+				Auction();                                                 // 경매 함수 실행
+				bettingReset();                                           // 이후 입찰에 사용된 변수들 초기화
 			}
 		}
 
@@ -370,17 +372,17 @@ namespace VirusWarGameServer
 		/// </summary>
 		void bettingReset()
 		{
-			Timer = 10f;                                         // 경매시간을 다시 10초로 초기화
-			NowBetGoldAmount = 0;                        // 현재경매 가격 초기화
-			//MyGold += MyBetGoldAmount;               // 만약 입찰이 끝날때 내 입찰을 눌러놓은 상태면 다시 내 골드에 더해준다
-			//MyBetGoldAmount = 0;                         //  그리고 내 입찰 가격 초기화
-			Bidder = "현재 입찰자";                          // 현재 입찰자 초기화
+			AuctionTime = 10;                                         // 경매시간을 다시 10초로 초기화
+			NowBetGoldAmount = 0;                                // 현재경매 가격 초기화
+			//MyGold += MyBetGoldAmount;                     // 만약 입찰이 끝날때 내 입찰을 눌러놓은 상태면 다시 내 골드에 더해준다
+			//MyBetGoldAmount = 0;                               //  그리고 내 입찰 가격 초기화
+			Bidder = "현재 입찰자";                                 // 현재 입찰자 초기화
 
 			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
-			msg.push(Timer);                                          // 초기화되는 즉시 모두 업데이트해서
+			msg.push(AuctionTime);                                          // 초기화되는 즉시 모두 업데이트해서
 			msg.push(NowBetGoldAmount);                      
 			msg.push(Bidder);
-			broadcast(msg);                                           // 모두에게 전송
+			broadcast(msg);                                                   // 모두에게 전송
 		}
 
 
@@ -411,7 +413,7 @@ namespace VirusWarGameServer
 				}
 				NowBetGoldAmount = sender.MyBetGoldAmount;          // 현재 입찰가를 내 입찰가로 초기화한다
 				sender.MyBetGoldAmount = 0;                                   // 내 입찰가를 초기화한다
-				time = 10f;                                                           // 남은 경매 시간을 10초로 초기화한다
+				AuctionTime = 10;                                                   // 남은 경매 시간을 10초로 초기화한다
 				Bidder = sender.playerName;                                     // 현채 입찰자를 자신으로 초기화한다
 			}
 
@@ -439,10 +441,6 @@ namespace VirusWarGameServer
 			}
 
 		}
-
-
-		
-		
 
 
 		/// 모든 경매가 끝났을때 실행
