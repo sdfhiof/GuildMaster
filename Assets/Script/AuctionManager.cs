@@ -7,6 +7,30 @@ using UnityEngine.Pool;
 
 public class AuctionManager : MonoBehaviour
 {
+    enum GAME_STATE
+    {
+        READY = 0,
+        STARTED
+    }
+
+    List<CPlayer> players;
+
+    // 서버에서 지정해준 본인의 플레이어 인덱스.
+    byte player_me_index;
+
+    // 게임 종료 후 메인으로 돌아갈 때 사용하기 위한 MainTitle객체의 레퍼런스.
+    CMainTitle main_title;
+
+    // 게임 상태에 따라 각각 다른 GUI모습을 구현하기 위해 필요한 상태 변수.
+    GAME_STATE game_state;
+
+    // 네트워크 데이터 송,수신을 위한 네트워크 매니저 레퍼런스.
+    CNetworkManager network_manager;
+
+    // OnGUI매소드에서 호출할 델리게이트.
+    // 여러 종류의 매소드를 만들어 놓고 상황에 맞게 draw에 대입해주는 방식으로 GUI를 변경시킨다.
+    delegate void GUIFUNC();
+    GUIFUNC draw;
 
     public List<GameObject> _auctionUnitList = new List<GameObject>();          /// 게임매니저에 넣어둘 원본 유닛들
     public List<GameObject> _auctionOrderList = new List<GameObject>();        /// 셔플을 통해 섞어둔 원본 유닛들

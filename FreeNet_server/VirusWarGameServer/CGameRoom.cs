@@ -87,14 +87,14 @@ namespace VirusWarGameServer
 			int to = list.Count;
 			while (to > 1)
 			{
-
-				int from = Random.Range(0, --to);
+				var rnd = new Random(DateTime.Now.Millisecond);
+				int from = rnd.Next(0, --to);
 				int tmp = list[from];
 				list[from] = list[to];
 				list[to] = tmp;
 
 			}
-
+			Console.WriteLine(list);
 		}
 
 		public void AuctionOrder(ref List<int> list)  // 셔플한 리스트로 _auctionOrderList를 다시 생성
@@ -241,19 +241,20 @@ namespace VirusWarGameServer
             });
 			broadcast(msg);
 
-			while (_instanceUnitsIDList.Count > 0 || _failedUnitsIDList.Count > 0)
+			while (_instanceUnitsIDList.Count > 0 || _failedUnitsIDList.Count > 0 || NowAuctionUnitID != 17)
             {
 				AuctionTimer();
 
 			}
 
-			game_over();
+			Auction_over();
 
 
 		}
 
 		void Auction()   // 최조 경매 시작 그리고 매 경매가 끝날 때마다 실행 
 		{
+			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONING);
 			if (0 <= NowAuctionUnitID && NowAuctionUnitID < 16)  // 현재 경매중인유닛이 있으면
 			{
 				this.players.ForEach(player =>
@@ -262,6 +263,7 @@ namespace VirusWarGameServer
 					{
 
 						player.bidUnitsID.Add(NowAuctionUnitID);                                  /// 위 게임 오브젝트를 리스트에 저장
+						msg.push(player.bidUnitsID);
 					}
 
 				});
@@ -276,7 +278,6 @@ namespace VirusWarGameServer
 			NowAuctionUnitID = RemoveActionUnitList();  // 경매 유닛 설정                                 
 
 			// 최종 결과를 broadcast한다.
-			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
 			msg.push(NowAuctionUnitID);                         // 어떤 유닛이 경매로 올라갔는지
 			msg.push(_failedUnitsIDList);                           // 경매에 사용되는 모든 리스트 업데이트
 			msg.push(_instanceUnitsIDList);
@@ -322,7 +323,7 @@ namespace VirusWarGameServer
 
 			_failedUnitsIDList.Add(FailedUnit);                                                                       /// 경매중이던 유닛을 유찰 리스트에 추가
 
-			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
+			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONING);
 			msg.push(NowAuctionUnitID);                         // 어떤 유닛이 경매로 올라갔는지
 			msg.push(_failedUnitsIDList);                           // 경매에 사용되는 모든 리스트 업데이트
 			msg.push(_instanceUnitsIDList);
@@ -374,11 +375,20 @@ namespace VirusWarGameServer
 		{
 			AuctionTime = 10;                                         // 경매시간을 다시 10초로 초기화
 			NowBetGoldAmount = 0;                                // 현재경매 가격 초기화
-			//MyGold += MyBetGoldAmount;                     // 만약 입찰이 끝날때 내 입찰을 눌러놓은 상태면 다시 내 골드에 더해준다
-			//MyBetGoldAmount = 0;                               //  그리고 내 입찰 가격 초기화
 			Bidder = "현재 입찰자";                                 // 현재 입찰자 초기화
 
-			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
+			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONING);
+			this.players.ForEach(player =>
+			{
+				msg.push(player.player_index);      // 누구인지 구분하기 위한 플레이어 인덱스.
+
+
+				player.myGold += player.MyBetGoldAmount;          // 
+				player.MyBetGoldAmount = 0;
+				msg.push(player.myGold);
+				msg.push(player.MyBetGoldAmount);
+
+			});
 			msg.push(AuctionTime);                                          // 초기화되는 즉시 모두 업데이트해서
 			msg.push(NowBetGoldAmount);                      
 			msg.push(Bidder);
@@ -396,14 +406,34 @@ namespace VirusWarGameServer
 			betting(sender);
 
 			// 최종 결과를 broadcast한다.
-			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
+			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONING);
 			msg.push(sender.playerName);		                    // 누가
 			msg.push(NowBetGoldAmount);				        // 얼마에 입찰했는지
 			msg.push(sender.myGold);				                // 남은 돈은 얼마인지
 			broadcast(msg);                                           // 모두에게 전송
 		}
 
-		void betting(CPlayer sender)  // 입찰 시 실행되는 함수
+		public void top_Bid()  // 누군가 상위 입찰을 할 경우 실행되는 함수
+		{
+			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONING);
+			this.players.ForEach(player =>
+			{
+				msg.push(player.player_index);      // 누구인지 구분하기 위한 플레이어 인덱스.
+
+				if (Bidder == player.playerName)                     // 현재 입찰자가 자신이라면
+				{
+					player.myGold += NowBetGoldAmount;             // 현재 경매가를 내 골드에 더해준다 입찰 실패시 경매급 환급
+				}
+
+				player.myGold += player.MyBetGoldAmount;          // 
+				player.MyBetGoldAmount = 0;
+				msg.push(player.myGold);
+				msg.push(player.MyBetGoldAmount);
+			});
+			broadcast(msg);                                           // 모두에게 전송
+
+		}
+		public void betting(CPlayer sender)  // 입찰 시 실행되는 함수
 		{
 			if (sender.MyBetGoldAmount > NowBetGoldAmount)                 // 입찰 시 내 입찰 가격이 현재 경매가 보다 커야 실행된다
 			{
@@ -411,40 +441,22 @@ namespace VirusWarGameServer
 				{
 					return;
 				}
+				top_Bid();
 				NowBetGoldAmount = sender.MyBetGoldAmount;          // 현재 입찰가를 내 입찰가로 초기화한다
 				sender.MyBetGoldAmount = 0;                                   // 내 입찰가를 초기화한다
 				AuctionTime = 10;                                                   // 남은 경매 시간을 10초로 초기화한다
-				Bidder = sender.playerName;                                     // 현채 입찰자를 자신으로 초기화한다
+                Bidder = sender.playerName;                                     // 현채 입찰자를 자신으로 초기화한다
+
+				CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONING);
+				msg.push(sender.playerName);                            // 누가
+				msg.push(NowBetGoldAmount);                     // 얼마에 입찰했는지
+				msg.push(sender.myGold);                                // 남은 돈은 얼마인지
+				broadcast(msg);                                           // 모두에게 전송
 			}
-
-			// 최종 결과를 broadcast한다.
-			CPacket msg = CPacket.create((short)PROTOCOL.PLAYER_AUCTIONED);
-			msg.push(sender.playerName);                       // 누가
-			msg.push(NowBetGoldAmount);                     // 얼마에 입찰했는지
-			msg.push(sender.myGold);                            // 남은 돈은 얼마인지
-			broadcast(msg);                                           // 모두에게 전송
-		}
-
-
-		/// <summary>
-		/// 클라이언트에서 턴 연출이 모두 완료 되었을 때 호출된다.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// 클라이언트의 경매가 최종적으로 끝났을 떄 적용
-		public void auction_finished(CPlayer sender)
-		{
-			change_playerstate(sender, PLAYER_STATE.CLIENT_AUCTION_FINISHED);
-
-			if (!allplayers_ready(PLAYER_STATE.CLIENT_AUCTION_FINISHED))
-			{
-				return;
-			}
-
-		}
-
+        }
 
 		/// 모든 경매가 끝났을때 실행
-		void game_over()
+		public void Auction_over()
 		{
 			// 경매 끝
 			

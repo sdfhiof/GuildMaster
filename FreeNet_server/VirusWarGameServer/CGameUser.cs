@@ -72,7 +72,7 @@ namespace VirusWarGameServer
 					break;
 
 				case PROTOCOL.AUCTION_FINISHED_REQ:
-					this.battle_room.auction_finished();
+					this.battle_room.Auction_over();
 					break;
 			}
 		}
