@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Pool;
+using FreeNet;
 
 public class AuctionManager : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public class AuctionManager : MonoBehaviour
     public List<GameObject> _failedPos = new List<GameObject>();                 /// 유찰 리스트의 유닛들 위치
 
     public string PlayerName;                       /// 플레이어 이름 차후 네트워크 연결시 서버에서 이름을 받아올 예정
-    public List<GameObject> _bidUnits;           /// 플레이어가 입찰 성공시 입찰한 유닛을 저장할 리스트
+    public List<GameObject> _bidUnits;          /// 플레이어가 입찰 성공시 입찰한 유닛을 저장할 리스트
     public Text Gold;                                  /// 플레이어 자금 텍스트 형식
     public int MyGold;                                /// Gold 텍스트 업데이트를 위한 int 변수 이 값을 변경시켜 
                                                            ///  Gold.text = MyGold.ToString()으로 텍스트 변경
@@ -73,18 +74,13 @@ public class AuctionManager : MonoBehaviour
 
     void Start()
     {
-        Timer = 2f;                               /// 초기 UI에 필요한  변수 초기화
+        Timer = 15f;                               /// 초기 UI에 필요한  변수 초기화
         NowBetGold.text = "0";                 /// 초기 UI에 필요한  변수 초기화
         MyBetGold.text = "0";                   /// 초기 UI에 필요한  변수 초기화
         NowBidder = "현재 입찰자";           /// 초기 UI에 필요한  변수 초기화
 
-
-
         SetUnitList();                               
-
         Auction();
-
-       
 
     }
 
@@ -98,7 +94,40 @@ public class AuctionManager : MonoBehaviour
         AuctionTimer();                                                              /// 경매 타이머 활성화 경매가 끝나도 다음 경매가 이루어져야 하므로 update에 배치
     }
 
-    #region 경매 시스템 초기 생성 전부 네트워크로 넘어갈 예정
+    void on_recv(CPacket msg)
+    {
+        PROTOCOL protocol_id = (PROTOCOL)msg.pop_protocol_id();
+
+        switch (protocol_id)
+        {
+            case PROTOCOL.AUCTION_START:
+                on_game_start(msg);
+                break;
+
+            case PROTOCOL.AUCTION_REQ:
+                on_player_moved(msg);
+                break;
+
+            case PROTOCOL.PLAYER_AUCTIONING:
+                on_start_player_turn(msg);
+                break;
+
+            case PROTOCOL.AUCTION_FINISHED_REQ:
+                on_room_removed();
+                break;
+
+            case PROTOCOL.ROOM_REMOVED:
+                on_room_removed();
+                break;
+
+            case PROTOCOL.AUCTION_OVER:
+                on_game_over(msg);
+                break;
+        }
+    }
+
+
+    #region 경매 시스템 
     public void SetUnitList()  // 초기 경매씬이 활성화 되면 실행
     {
         

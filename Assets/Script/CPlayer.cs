@@ -5,7 +5,6 @@ using FreeNet;
 
 public class CPlayer : MonoBehaviour
 {
-	CGameUser owner;
 	public byte player_index { get; private set; }
 	public List<int> bidUnitsID { get; private set; }
 
@@ -15,7 +14,7 @@ public class CPlayer : MonoBehaviour
 
 	public int MyBetGoldAmount;
 
-	public CPlayer(CGameUser user, byte player_index)
+	public CPlayer(byte player_index)
 	{
 		this.player_index = player_index;
 		this.bidUnitsID = new List<int>();
@@ -29,17 +28,10 @@ public class CPlayer : MonoBehaviour
 		this.myGold = 1000;
 	}
 
-	public void send(CPacket msg)
+	public void initialize(byte player_index)
 	{
-		this.owner.send(msg);
-		CPacket.destroy(msg);
+		this.player_index = player_index;
 	}
-
-	public void send_for_broadcast(CPacket msg)
-	{
-		this.owner.send(msg);
-	}
-
 }
 
 

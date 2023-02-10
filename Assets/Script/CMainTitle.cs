@@ -6,6 +6,7 @@ using FreeNet;
 public class CMainTitle : MonoBehaviour
 {
 
+
 	enum USER_STATE
 	{
 		NOT_CONNECTED,
