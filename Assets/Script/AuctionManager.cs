@@ -94,7 +94,7 @@ public class AuctionManager : MonoBehaviour
         AuctionTimer();                                                              /// 경매 타이머 활성화 경매가 끝나도 다음 경매가 이루어져야 하므로 update에 배치
     }
 
-    void on_recv(CPacket msg)
+    void on_recv(CPacket msg)  // 받아온 패킷을 id를 통해 어떤 함수를 실행 시킬지 판단하는 함수
     {
         PROTOCOL protocol_id = (PROTOCOL)msg.pop_protocol_id();
 
@@ -117,7 +117,7 @@ public class AuctionManager : MonoBehaviour
                 break;
 
             case PROTOCOL.ROOM_REMOVED:
-                on_room_removed();
+                on_Auction_removed();
                 break;
 
             case PROTOCOL.AUCTION_OVER:

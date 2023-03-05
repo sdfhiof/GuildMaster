@@ -110,7 +110,7 @@ namespace VirusWarGameServer
             if (this.matching_waiting_users.Count == 4)
             {
                 // 게임 방 생성.
-                this.room_manager.create_room(this.matching_waiting_users[0], this.matching_waiting_users[1], this.matching_waiting_users[2], this.matching_waiting_users[4]);
+                this.room_manager.create_room(this.matching_waiting_users[0], this.matching_waiting_users[1], this.matching_waiting_users[2], this.matching_waiting_users[3]);
 
                 // 매칭 대기 리스트 삭제.
                 this.matching_waiting_users.Clear();
