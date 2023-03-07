@@ -19,7 +19,7 @@ public class CPlayer : MonoBehaviour
 		this.player_index = player_index;
 		this.bidUnitsID = new List<int>();
 		this.myGold = 1000;
-		this.playerName = $"GuildMaster{(int)player_index}";
+		this.playerName = $"GuildMaster{player_index}";
 	}
 
 	public void reset()

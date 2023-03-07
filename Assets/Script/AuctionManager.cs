@@ -28,6 +28,9 @@ public class AuctionManager : MonoBehaviour
     // 네트워크 데이터 송,수신을 위한 네트워크 매니저 레퍼런스.
     CNetworkManager network_manager;
 
+    // 경매가 종료되었는지를 나타내는 플래그.
+    bool is_auction_finished;
+
     // OnGUI매소드에서 호출할 델리게이트.
     // 여러 종류의 매소드를 만들어 놓고 상황에 맞게 draw에 대입해주는 방식으로 GUI를 변경시킨다.
     delegate void GUIFUNC();
@@ -78,10 +81,6 @@ public class AuctionManager : MonoBehaviour
         NowBetGold.text = "0";                 /// 초기 UI에 필요한  변수 초기화
         MyBetGold.text = "0";                   /// 초기 UI에 필요한  변수 초기화
         NowBidder = "현재 입찰자";           /// 초기 UI에 필요한  변수 초기화
-
-        SetUnitList();                               
-        Auction();
-
     }
 
 
@@ -96,96 +95,63 @@ public class AuctionManager : MonoBehaviour
 
     void on_recv(CPacket msg)  // 받아온 패킷을 id를 통해 어떤 함수를 실행 시킬지 판단하는 함수
     {
-        PROTOCOL protocol_id = (PROTOCOL)msg.pop_protocol_id();
+        Protocol protocol = new Protocol();
+
+        Protocol.PROTOCOL protocol_id = (Protocol.PROTOCOL)msg.pop_protocol_id();
 
         switch (protocol_id)
         {
-            case PROTOCOL.AUCTION_START:
-                on_game_start(msg);
+            case Protocol.PROTOCOL.AUCTION_START:
+                on_auction_start(msg);
                 break;
 
-            case PROTOCOL.AUCTION_REQ:
+            case Protocol.PROTOCOL.AUCTION_REQ:
                 on_player_moved(msg);
                 break;
 
-            case PROTOCOL.PLAYER_AUCTIONING:
+            case Protocol.PROTOCOL.PLAYER_AUCTIONING:
                 on_start_player_turn(msg);
                 break;
 
-            case PROTOCOL.AUCTION_FINISHED_REQ:
+            case Protocol.PROTOCOL.AUCTION_FINISHED_REQ:
                 on_room_removed();
                 break;
 
-            case PROTOCOL.ROOM_REMOVED:
-                on_Auction_removed();
+            case Protocol.PROTOCOL.ROOM_REMOVED:
+                on_auction_removed();
                 break;
 
-            case PROTOCOL.AUCTION_OVER:
-                on_game_over(msg);
+            case Protocol.PROTOCOL.AUCTION_OVER:
+                on_auction_over(msg);
                 break;
         }
     }
 
-
-    #region 경매 시스템 
-    public void SetUnitList()  // 초기 경매씬이 활성화 되면 실행
+    void on_auction_start(CPacket msg)
     {
-        
-        _auctionUnitList.Clear();                     //  리스트를 초기화
-        int _auctionUnitListCount = 12;           // 리스트에 들어갈 인스턴스 수
-
-        
-
-        for (int i= 0 ; i< _auctionUnitListCount; i++)         // 반복문으로 리스트에 게임오브젝트 추가
-        {
-            _auctionUnitList.Add(AuctionUnit.transform.GetChild(i).gameObject); // AuctionUnit의 자식오브젝트를 순서대로 가져옴
-
-            // if (AuctionUnit.transform.GetChild(i) == null) return;
-
-        }
-
-        AuctionOrder(ref _auctionUnitList);                   /// SetUnitList로 만든 _auctionUnitList를 셔플해서 _auctionOrderList를 생성
-        AuctionInOrder(ref _instanceUnitsList);              /// AuctionOrder로 만든 _auctionOrderList를 이용해 _instanceUnitsList를 생성
+        MyGold = msg.pop_byte();
+        Auction();
     }
 
-    public void ShuffleList(ref List<GameObject> list)    // 리스트를 셔플해주는 함수
+    void on_player_moved(CPacket msg)
     {
-        
-        int to = list.Count;
-        while (to > 1)
-        {
-            
-            int from = Random.Range(0, --to);
-            GameObject tmp = list[from];
-            list[from] = list[to];
-            list[to] = tmp;
-            
-        }
-        
-    }
-
-    public void AuctionOrder(ref List<GameObject> list)  // 셔플한 리스트로 _auctionOrderList를 다시 생성
-    {
-        ShuffleList(ref list);
-        _auctionOrderList = new List<GameObject>(list);
-    }
-
-    public void AuctionInOrder(ref List<GameObject> list)  // 셔플한 리스트로 _instanceUnitsList를 생성
-    {
-        for(int i = 0; i < 12; i++)
-        {
-            _auctionPos[i].transform.localScale += new Vector3(2f, 2f, 1f);               /// 생성한 인스턴스 크기 조정을 위해 _auctionPos크기를 조정함
-            list[i] = Instantiate(_auctionOrderList[i], _auctionPos[i].transform);           /// _auctionOrderList의 i번째 오브젝트를 _auctionPos[i]의 자식으로
-                                                                                                          /// 인스턴스화 리스트 수만큼 반복
-           
-        }
-       
 
     }
 
-    #endregion
+    void on_start_player_turn(CPacket msg)
+    {
 
+    }
 
+    void on_room_removed()
+    {
+
+    }
+
+    void on_auction_removed()
+    {
+
+    }
 
     #region 경매 기능
     public void Auction()   // 최조 경매 시작 그리고 매 경매가 끝날 때마다 실행  서버로 넘어갈듯
@@ -219,10 +185,6 @@ public class AuctionManager : MonoBehaviour
 
         
     }
-
-    //AuctionUnit.transform.GetChild(ActOrListPnt-1).gameObject;
-    //NowAuctionUnit = AuctionUnit.transform.GetChild(ActOrListPnt - 1).gameObject;
-    // auctionunit에있는걸 가져와보려고했는데 실패함 
 
     public void AuctionFailed()  // 아무도 경매에 참여하지 않았을 시 실행  서버로 넘어갈듯
     {

@@ -94,7 +94,6 @@ namespace VirusWarGameServer
 				list[to] = tmp;
 
 			}
-			Console.WriteLine(list);
 		}
 
 		public void AuctionOrder(ref List<int> list)  // 셔플한 리스트로 _auctionOrderList를 다시 생성
