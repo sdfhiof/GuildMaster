@@ -127,9 +127,24 @@ public class AuctionManager : MonoBehaviour
         }
     }
 
+    List<GameObject> listConversion(List<int> List)
+    {
+        List<GameObject> _unitsList = new List<GameObject>();
+        for(int i = 0; i < List.Count; i++)
+        {
+            GameObject unit = GameObject.Find($"Unit{List[i]}");
+            _unitsList.Add(unit);
+        }
+        return _unitsList;
+    }
+
     void on_auction_start(CPacket msg)
     {
         MyGold = msg.pop_byte();
+        _auctionUnitList = msg.pop_list();
+        _auctionOrderList = msg.pop_list();
+        _instanceUnitsList = msg.pop_list();
+        _failedUnitsList = msg.pop_list();
         Auction();
     }
 

@@ -97,6 +97,19 @@ namespace FreeNet
 			return data;
 		}
 
+		// 패킷에서 데이터를 꺼내 리스트로 변환해야함
+	    public List<int> pop_list()
+	    {
+			List<int> data = new List<int>();
+			for (int i = 0; i < 16; i++)
+			{
+				Int32 number = BitConverter.ToInt32(this.buffer, this.position);
+				this.position += sizeof(Int32);
+				data.Add(number);
+			}
+	    	return data;
+	    }
+
 
 
 		public void set_protocol(Int16 protocol_id)
