@@ -36,6 +36,8 @@ public class AuctionManager : MonoBehaviour
     delegate void GUIFUNC();
     GUIFUNC draw;
 
+    Protocol protocol;
+
     public List<GameObject> _auctionUnitList = new List<GameObject>();          /// 게임매니저에 넣어둘 원본 유닛들
     public List<GameObject> _auctionOrderList = new List<GameObject>();        /// 셔플을 통해 섞어둔 원본 유닛들
     public List<GameObject> _instanceUnitsList = new List<GameObject>();        /// 게임내 경매 리스트에 나타나는 인스턴스 프리팹들
@@ -74,9 +76,14 @@ public class AuctionManager : MonoBehaviour
     public Text TimeText;         /// 현재 경매 남은 시간을표현 텍스트 형식
     public float Timer;             /// TimeText 텍스트 업데이트를 위한 위한 float 변수 이 값을 변경시켜 
                                         /// TimeText.text = Mathf.Ceil(Timer).ToString()로 텍스트 변경
+                                        /// 
+
 
     void Start()
     {
+        this.network_manager = GameObject.Find("GameManager").GetComponent<CNetworkManager>();
+        this.network_manager.message_receiver = this;
+
         Timer = 15f;                               /// 초기 UI에 필요한  변수 초기화
         NowBetGold.text = "0";                 /// 초기 UI에 필요한  변수 초기화
         MyBetGold.text = "0";                   /// 초기 UI에 필요한  변수 초기화
@@ -96,6 +103,7 @@ public class AuctionManager : MonoBehaviour
     void on_recv(CPacket msg)  // 받아온 패킷을 id를 통해 어떤 함수를 실행 시킬지 판단하는 함수
     {
         Protocol protocol = new Protocol();
+        
 
         Protocol.PROTOCOL protocol_id = (Protocol.PROTOCOL)msg.pop_protocol_id();
 
@@ -106,23 +114,23 @@ public class AuctionManager : MonoBehaviour
                 break;
 
             case Protocol.PROTOCOL.AUCTION_REQ:
-                on_player_moved(msg);
+                
                 break;
 
             case Protocol.PROTOCOL.PLAYER_AUCTIONING:
-                on_start_player_turn(msg);
+                
                 break;
 
             case Protocol.PROTOCOL.AUCTION_FINISHED_REQ:
-                on_room_removed();
+                
                 break;
 
             case Protocol.PROTOCOL.ROOM_REMOVED:
-                on_auction_removed();
+                
                 break;
 
             case Protocol.PROTOCOL.AUCTION_OVER:
-                on_auction_over(msg);
+                
                 break;
         }
     }
@@ -148,28 +156,9 @@ public class AuctionManager : MonoBehaviour
         Auction();
     }
 
-    void on_player_moved(CPacket msg)
-    {
-
-    }
-
-    void on_start_player_turn(CPacket msg)
-    {
-
-    }
-
-    void on_room_removed()
-    {
-
-    }
-
-    void on_auction_removed()
-    {
-
-    }
 
     #region 경매 기능
-    public void Auction()   // 최조 경매 시작 그리고 매 경매가 끝날 때마다 실행  서버로 넘어갈듯
+    public void Auction()   // 최조 경매 시작 그리고 매 경매가 끝날 때마다 실행  
     {
         if (NowAuctionUnit != null)  // 현재 경매중인유닛이 있으면
         {
@@ -275,7 +264,7 @@ public class AuctionManager : MonoBehaviour
             _instanceUnitsList.Add(new GameObject());
             
         }
-        Debug.Log(_failedUnitsList.Count);
+
         for (int k = 0; k < _failedUnitsList.Count ; k++)
         {
             _instanceUnitsList[k] = Instantiate(_failedUnitsList[k], _auctionPos[k].transform);
@@ -326,7 +315,7 @@ public class AuctionManager : MonoBehaviour
 
     void BettingReset() // 입찰이 끝나고 입찰에 사용된 변수들 초기화
     {
-        Timer = 2f;                                         // 경매시간을 다시 15초로 초기화
+        Timer = 10f;                                         // 경매시간을 다시 10초로 초기화
         NowBetGoldAmount = 0;                        // 현재경매 가격 초기화
         MyGold += MyBetGoldAmount;               // 만약 입찰이 끝날때 내 입찰을 눌러놓은 상태면 다시 내 골드에 더해준다
         MyBetGoldAmount = 0;                         //  그리고 내 입찰 가격 초기화
@@ -335,7 +324,7 @@ public class AuctionManager : MonoBehaviour
 
     public void Betting()  // 입찰 버튼 함수
     {
-        if(MyBetGoldAmount > NowBetGoldAmount)                 // 입찰 시 내 입찰 가격이 현재 경매가 보다 커야 실행된다
+        if (MyBetGoldAmount > NowBetGoldAmount)                 // 입찰 시 내 입찰 가격이 현재 경매가 보다 커야 실행된다
         {                                                                          
             if(NowBidder == PlayerName)                                // 현재 입찰자가 자신이라면 입찰 비활성화한다
             {                                                                      
@@ -345,6 +334,11 @@ public class AuctionManager : MonoBehaviour
             MyBetGoldAmount = 0;                                        // 내 입찰가를 초기화한다
             Timer = 10f;                                                       // 남은 경매 시간을 10초로 초기화한다
             NowBidder = PlayerName;                                     // 현채 입찰자를 자신으로 초기화한다
+
+            CPacket msg = CPacket.create((short)Protocol.PROTOCOL.BETTING);
+            msg.push(player_me_index);                         
+            msg.push(NowBetGoldAmount);                         
+            this.network_manager.send(msg);
         }
         
     }

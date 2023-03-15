@@ -55,7 +55,9 @@ namespace VirusWarGameServer
 
 		int NowBetGoldAmount;
 
-		int  AuctionTime;
+		int AuctionTime = 15;
+
+		Timer ATimer;
 
 		public CGameRoom()
 		{
@@ -166,9 +168,9 @@ namespace VirusWarGameServer
 		/// </summary>
 		public void enter_gameroom(CGameUser user1, CGameUser user2, CGameUser user3, CGameUser user4)
 		{
-			// 플레이어들을 생성하고 각각 0번, 1번, 2번, 3번 인덱스를 부여해 준다.
-			CPlayer player1 = new CPlayer(user1, 0);
-			CPlayer player2 = new CPlayer(user2, 1);
+			// 플레이어들을 생성하고 각각 1번, 2번, 3번, 4번 인덱스를 부여해 준다.
+			CPlayer player1 = new CPlayer(user1, 1);
+			CPlayer player2 = new CPlayer(user2, 2);
 			CPlayer player3 = new CPlayer(user3, 3);
 			CPlayer player4 = new CPlayer(user4, 4); 
 			this.players.Clear();
@@ -226,7 +228,7 @@ namespace VirusWarGameServer
 		/// </summary>
 		void Auction_start()
 		{
-			// 게임을 새로 시작할 때 마다 초기화해줘야 할 것들.
+			// 게임을 새로 시작할 때 마다 혹은 경매가 끝날때마다 초기화해줘야 할 것들.
 			bettingReset();
 
 			// 게임 시작 메시지 전송.
@@ -350,30 +352,35 @@ namespace VirusWarGameServer
 			bettingReset();
 
 		}
+		void Timer_Elapsed(object sender ,System.Timers.ElapsedEventArgs e)
+        {
+			AuctionTime -= 1;
+        }
 
 		void AuctionTimer()  // 상시로 실행되는 경매 시간 함수
 		{
+			ATimer = new Timer();
+			ATimer.Interval = 1000;
+			ATimer.Enabled = true;
 
 			if (AuctionTime > 0)                                        // 경매 시간이 0초가 아니면
 			{
-				AuctionTime -= Time.deltaTime;                     // 1초씩 감소
+				ATimer.Elapsed += new ElapsedEventHandler(Timer_Elapsed);                      // 1초씩 감소
 			}
 			else if (NowBetGoldAmount == 0)                     // 경매 시간이 다 됐는데 아무도 입찰하지 않았다면 실행
-			{														        
-				AuctionFailed();                                          // 유찰 함수 실행
+			{
 				bettingReset();                                           // 이후 입찰에 사용된 변수들 초기화
+				AuctionFailed();                                          // 유찰 함수 실행
 			}														        
 			else if (NowBetGoldAmount > 0)                       // 경매 시간이 다 됐는데 누군가 입찰했다면
-			{														        
-				Auction();                                                 // 경매 함수 실행
+			{
 				bettingReset();                                           // 이후 입찰에 사용된 변수들 초기화
+				Auction();                                                 // 경매 함수 실행
 			}
 		}
 
-		/// <summary>
+
 		/// 게임 데이터를 초기화 한다.
-		/// 게임을 새로 시작할 때 마다 초기화 해줘야 할 것들을 넣는다.
-		/// </summary>
 		void bettingReset()
 		{
 			AuctionTime = 10;                                         // 경매시간을 다시 10초로 초기화
@@ -398,16 +405,20 @@ namespace VirusWarGameServer
 			broadcast(msg);                                                   // 모두에게 전송
 		}
 
-
-		/// <summary>
-		/// 클라이언트의 이동 요청.
-		/// </summary>
-		/// <param name="sender">요청한 유저</param>
-		/// 여기가 경매 입찰등의 로직으로 채워질 것
-		public void auction_req(CPlayer sender)
+		void on_recv(CPacket msg)  // 받아온 패킷을 id를 통해 어떤 함수를 실행 시킬지 판단하는 함수
 		{
-			betting(sender);
+
+			PROTOCOL protocol_id = (PROTOCOL)msg.pop_protocol_id();
+
+			switch (protocol_id)
+			{
+				case PROTOCOL.BETTING:
+					betting(msg);
+					break;
+
+			}
 		}
+
 
 		public void top_Bid()  // 누군가 상위 입찰을 할 경우 실행되는 함수
 		{
@@ -429,25 +440,29 @@ namespace VirusWarGameServer
 			broadcast(msg);                                           // 모두에게 전송
 
 		}
-		public void betting(CPlayer sender)  // 입찰 시 실행되는 함수
+		public void betting(CPacket Rmsg)  // 입찰 시 실행되는 함수
 		{
-			if (sender.MyBetGoldAmount > NowBetGoldAmount)                 // 입찰 시 내 입찰 가격이 현재 경매가 보다 커야 실행된다
+			int player_Index = Rmsg.pop_byte() - 1;
+
+			CPlayer player = players[player_Index];
+
+			if (player.MyBetGoldAmount > NowBetGoldAmount)                 // 입찰 시 내 입찰 가격이 현재 경매가 보다 커야 실행된다
 			{
-				if (Bidder == sender.playerName)                                // 현재 입찰자가 자신이라면 입찰 비활성화한다
+				if (Bidder == player.playerName)                                // 현재 입찰자가 자신이라면 입찰 비활성화한다
 				{ 
 					return;
 				}
 				top_Bid();
-				NowBetGoldAmount = sender.MyBetGoldAmount;          // 현재 입찰가를 내 입찰가로 초기화한다
-				sender.MyBetGoldAmount = 0;                                   // 내 입찰가를 초기화한다
-				sender.myGold -= NowBetGoldAmount;                       // 입찰시 돈이 빠져나간다
+				NowBetGoldAmount = Rmsg.pop_int16();                   // 현재 입찰가를 클라이언트에서 요청한 입찰가로 초기화한다
+				player.MyBetGoldAmount = 0;                                   // 내 입찰가를 초기화한다
+				player.myGold -= NowBetGoldAmount;                       // 입찰시 돈이 빠져나간다
 				AuctionTime = 10;                                                   // 남은 경매 시간을 10초로 초기화한다
-                Bidder = sender.playerName;                                     // 현채 입찰자를 자신으로 초기화한다
+                Bidder = player.playerName;                                     // 현채 입찰자를 자신으로 초기화한다
 
 				CPacket msg = CPacket.create((short)PROTOCOL.BETTING);
-				msg.push(sender.playerName);                            // 누가
+				msg.push(player.playerName);                            // 누가
 				msg.push(NowBetGoldAmount);                     // 얼마에 입찰했는지
-				msg.push(sender.myGold);                                // 남은 돈은 얼마인지
+				msg.push(player.myGold);                                // 남은 돈은 얼마인지
 				broadcast(msg);                                           // 모두에게 전송
 			}
         }

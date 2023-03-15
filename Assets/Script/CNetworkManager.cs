@@ -51,7 +51,7 @@ public class CNetworkManager : MonoBehaviour
 					CLogManager.log("on connected");
 					this.received_msg += "on connected\n";
 
-					GameObject.Find("MainTitle").GetComponent<CMainTitle>().on_connected();
+					GameObject.Find("AuctionManager").GetComponent<CMainTitle>().on_connected();
 				}
 				break;
 

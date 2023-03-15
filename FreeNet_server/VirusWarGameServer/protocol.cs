@@ -20,7 +20,7 @@ namespace VirusWarGameServer
 		// 플레이어가 입찰 중임을 알린다.
 		PLAYER_AUCTIONING = 5,
 
-		// 클라이언트의 입찰 연출이 끝났음을 알린다.
+		// 클라이언트의 입찰이 끝났음을 알린다.
 		AUCTION_FINISHED_REQ = 6,
 
 		// 유찰되었음을 알린다.
